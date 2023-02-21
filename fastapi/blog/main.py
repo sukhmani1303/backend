@@ -85,5 +85,38 @@ def update_blog(id,request: schemas.Blog,db : Session = Depends(get_db)):
     return 'updated !'
 
 
+### Other MySQL Function ###
+# https://docs.sqlalchemy.org/en/14/core/sqlelement.html
+
+# Examples :
+'''
+limit function :
+
+def get_items(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Item).offset(skip).limit(limit).all()
+    
+##############################
+    
+groupby function and count function :
+
+from sqlalchemy import func
+def get_items(db: Session, skip: int = 0, limit: int = 100):
+    db.query(models.Item.column, func.count(models.Item.column)).group_by(models.Item.column).all()
+
+##############################
+    
+first function :
+
+user = db.query(User).first()
+
+##############################
+
+orderby function :
+
+from sqlalchemy import desc
+stmt = select(users_table).order_by(desc(users_table.c.name))
+
+'''
+
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)
