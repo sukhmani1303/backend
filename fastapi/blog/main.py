@@ -118,5 +118,37 @@ stmt = select(users_table).order_by(desc(users_table.c.name))
 
 '''
 
+### Response Models ###
+
+# it basically dictates the format of response
+# we have to create a class in schemas and use it as
+# response_model to get response as its data members only
+# For Eg: it class has 2 Data-Members (title and body) then
+# the response even if it contains title, body and id will
+# only return title and body
+
+# if we deal with DB, we need to add :
+# class Config:
+#    orm_mode = True
+# inside the class in schemas
+
+# in the following example we are requesting a response involving DB
+# in the format of ShowBlog as we created ShowBlog class in schemas
+
+# We must use the following and declare the model as List
+from typing import List
+
+# Declare the request model in path :
+@app.get('/blog22/{id}',status_code=200, response_model=List[schemas.ShowBlog])
+def show(id, response : Response,db : Session = Depends(get_db)):
+    
+    blog = db.query(models.Blog).filter(models.Blog.id == id).all()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f"blog with id = {id} not found !")
+
+    return blog
+
+# Now we can simply make changes in the data-members of response model class and modify the response format
+
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)
