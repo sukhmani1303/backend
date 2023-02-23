@@ -162,6 +162,28 @@ def create_user(request: schemas.User, db : Session = Depends(get_db)):
     db.refresh(new_usr)
     return new_usr
 
+## Hashing the Password ##
+
+# FastAPI asks us to use passlib for hashing
+# for encryption, it has several steps :
+
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@app.post('/user_safe')
+def create_user(request: schemas.User, db : Session = Depends(get_db)):
+
+    # we create the encrypted pass by passing original password in the function of pwd_content obj
+    hashed_pass = pwd_context.hash(request.password)
+    
+    new_usr = models.User(name = request.name, password = hashed_pass, email = request.email)
+    db.add(new_usr)
+    db.commit()
+    # for returning the row :
+    db.refresh(new_usr)
+    return new_usr
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)
