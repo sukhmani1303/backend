@@ -1,21 +1,24 @@
 from fastapi import FastAPI, Depends, status, Response, HTTPException
 import uvicorn
-from database import engine, SessionLocal
-
+from main.database import engine, get_db
+from routers import r_blog
 # professionally we create a new python file to store all BaseModel Classes
-import schemas, models # here, schemas is the py file
+import main.schemas as schemas, main.models as models # here, schemas is the py file
 
 app = FastAPI()
 
 ### creating Tables ###
 
 models.Base.metadata.create_all(engine)
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
+app.include_router(r_blog.router)
+
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 ### Create Operation ###
 
@@ -33,12 +36,12 @@ def create(request: schemas.Blog, db : Session = Depends(get_db)): # we use "fil
 
 ### read data from DataBase ###
 
-@app.get('/blog1') # simple get all
-def all(db : Session = Depends(get_db)):
+# @app.get('/blog1') # simple get all
+# def all(db : Session = Depends(get_db)):
     
-    # we can fetch all records using .all() function from Blog table in models
-    blogs = db.query(models.Blog).all()
-    return blogs
+#     # we can fetch all records using .all() function from Blog table in models
+#     blogs = db.query(models.Blog).all()
+#     return blogs
 
 @app.get('/blog2/{id}') # get with conditions
 def show(id, response : Response,db : Session = Depends(get_db)):
