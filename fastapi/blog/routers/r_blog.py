@@ -1,45 +1,33 @@
-from fastapi import APIRouter, Depends,status,HTTPException
-from main import database, models,schemas
+from fastapi import APIRouter, Depends,status
+from main import database,schemas
 from typing import List
 from sqlalchemy.orm import Session
+from repository import blog
 
 get_db = database.get_db
 
-router = APIRouter()
+router = APIRouter(
+    prefix = '/blog',
+    tags = ['blogs']
+)
 
-@router.post('/blog', status_code = status.HTTP_201_CREATED ,tags = ['blog']) 
-def create(request: schemas.Blog, db : Session = Depends(get_db)): 
-    new_blog = models.Blog(title = request.title, body = request.body, user_id = 1)
-    db.add(new_blog)
-    db.commit()
-    db.refresh(new_blog)
-    return new_blog
-
-@router.get('/blog' ,tags = ['blog'])
+@router.get('/')
 def all(db : Session = Depends(get_db)):
-    blogs = db.query(models.Blog).all()
-    return blogs
+    return blog.get_all(db)
 
-@router.get('/blog/{id}',status_code=200, response_model=List[schemas.ShowBlog] ,tags = ['blog'])
+@router.post('/', status_code = status.HTTP_201_CREATED) 
+def create(request: schemas.Blog, db : Session = Depends(get_db)): 
+    return blog.create_new(db, request)
+
+@router.get('/{id}',status_code=200, response_model=List[schemas.ShowBlog])
 def show(id,db : Session = Depends(get_db)):
-    blog = db.query(models.Blog).filter(models.Blog.id == id).all()
-    if not blog:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f"blog with id = {id} not found !")
-    return blog
+    return blog.view(db, id)
 
-@router.delete('/blog/{id}', status_code=status.HTTP_204_NO_CONTENT ,tags = ['blog'])
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def del_blog(id,db : Session = Depends(get_db)):
-    db.query(models.Blog).filter(models.Blog.id == id).delete(synchronize_session=False)
-    db.commit()
-    return 'done'
+    return blog.delete(db, id)
 
-
-@router.put('/blog/{id}', status_code=status.HTTP_202_ACCEPTED ,tags = ['blog'])
+@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED)
 def update_blog(id,request: schemas.Blog,db : Session = Depends(get_db)):
-    blog = db.query(models.Blog).filter(models.Blog.id == id)
-    if not blog:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"blog with id {id} not found !")
-    blog.update({'title' : request.title, 'body' : request.body})
-    db.commit()
-    return 'updated !'
+    return blog.update(db,id,request)
 
