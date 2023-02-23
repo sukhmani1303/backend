@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 @app.post('/blog', status_code = status.HTTP_201_CREATED) # here, we can set status codes using 'status'
 def create(request: schemas.Blog, db : Session = Depends(get_db)): # we use "file_name.class" to fetch class data
-    new_blog = models.Blog(title = request.title, body = request.body)
+    new_blog = models.Blog(title = request.title, body = request.body, user_id = 1)
     db.add(new_blog)
     db.commit()
     # for returning the row :
@@ -177,7 +177,7 @@ def create_user(request: schemas.User, db : Session = Depends(get_db)):
     # we create the encrypted pass by passing original password in the function of pwd_content obj
     hashed_pass = pwd_context.hash(request.password)
 
-    new_usr = models.User(name = request.name, password = hashed_pass, email = request.email)
+    new_usr = models.User(name = request.name, password = hashed_pass, email = request.email, )
 
 # ## We genrally create hasing.py file which contains all classes for cryption/encryption etc
 
@@ -204,6 +204,26 @@ def usr_details(id:int, db : Session = Depends(get_db)):
     return user
 
 
+### Foreign Key & Relationships ###
+
+# we import relationships from sqlalchemy in models.py file as we deal in DB
+# Now we can get users based on thier blogs using relationships
+
+@app.get('/blog_user/{id}',status_code=200, response_model=List[schemas.BlogUser])
+def show(id, response : Response,db : Session = Depends(get_db)):
+    
+    blog = db.query(models.Blog).filter(models.Blog.id == id).all()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = f"blog with id = {id} not found !")
+
+    return blog
+
+# with relationship, we can see all blogs by a user also as its both ways
+
+@app.get('/blogs_bu/{id}', status_code=status.HTTP_200_OK, response_model = List[schemas.BlogsByUser])
+def get_blogsbu(id : int, db : Session = Depends(get_db)):
+    blogs = db.query(models.User).filter(models.User.id == id).all()
+    return blogs
 
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)
