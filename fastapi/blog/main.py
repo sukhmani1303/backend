@@ -193,6 +193,17 @@ def create_user(request: schemas.User, db : Session = Depends(get_db)):
     return new_usr
 
 
+### Show User ###
+
+
+@app.get('/user/{id}', response_model=List[schemas.ShowUser])
+def usr_details(id:int, db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).all()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= f"user with id {id} not found !")
+    return user
+
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)
