@@ -128,7 +128,7 @@ stmt = select(users_table).order_by(desc(users_table.c.name))
 # only return title and body
 
 # if we deal with DB, we need to add :
-# class Config:
+# class Config():
 #    orm_mode = True
 # inside the class in schemas
 
@@ -149,6 +149,19 @@ def show(id, response : Response,db : Session = Depends(get_db)):
     return blog
 
 # Now we can simply make changes in the data-members of response model class and modify the response format
+
+
+### CREATE USER ###
+
+@app.post('/user')
+def create_user(request: schemas.User, db : Session = Depends(get_db)):
+    new_usr = models.User(name = request.name, password = request.password, email = request.email)
+    db.add(new_usr)
+    db.commit()
+    # for returning the row :
+    db.refresh(new_usr)
+    return new_usr
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host = "127.0.0.1", port = 8050)

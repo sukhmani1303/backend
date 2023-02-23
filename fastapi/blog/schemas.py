@@ -24,3 +24,13 @@ class ShowBlog(Blog):
         orm_mode = True
         
 '''
+
+## for user creation :
+
+class User(BaseModel):
+    name: str
+    email: str
+    password: str
+    class Config():
+        orm_mode = True
+
