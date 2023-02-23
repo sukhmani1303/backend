@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List,Union
 
 class Blog(BaseModel):
     title: str
@@ -49,6 +49,14 @@ class BlogsByUser(ShowUser):
     blogs : List[Blog] = [] # to get a list of blogs only 
 
 
-class login(BaseModel):
-    username: str
-    password: str
+# class login(BaseModel):
+#     username: str
+#     password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: Union[str, None] = None
