@@ -176,13 +176,22 @@ def create_user(request: schemas.User, db : Session = Depends(get_db)):
 
     # we create the encrypted pass by passing original password in the function of pwd_content obj
     hashed_pass = pwd_context.hash(request.password)
-    
+
     new_usr = models.User(name = request.name, password = hashed_pass, email = request.email)
+
+# ## We genrally create hasing.py file which contains all classes for cryption/encryption etc
+
+#     from hashing import Hash
+
+#     new_usr = models.User(name = request.name, password = Hash.bcrypt(request.password), email = request.email) 
+
+
     db.add(new_usr)
     db.commit()
     # for returning the row :
     db.refresh(new_usr)
     return new_usr
+
 
 
 if __name__ == '__main__':
