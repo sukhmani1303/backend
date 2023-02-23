@@ -3,13 +3,14 @@
 from fastapi import FastAPI
 import uvicorn
 from main.database import engine
-from routers import r_blog,r_user
+from routers import r_blog,r_user,auth
 from main import models
 
 app = FastAPI()
 models.Base.metadata.create_all(engine)
 
 
+app.include_router(auth.router)
 app.include_router(r_blog.router)
 app.include_router(r_user.router)
 

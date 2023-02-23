@@ -47,3 +47,8 @@ class BlogUser(ShowBlog):
 ## extended class to get all blogs of created
 class BlogsByUser(ShowUser):
     blogs : List[Blog] = [] # to get a list of blogs only 
+
+
+class login(BaseModel):
+    username: str
+    password: str
